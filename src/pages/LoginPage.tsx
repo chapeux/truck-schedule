@@ -1,0 +1,122 @@
+import { useState, FormEvent } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from '../hooks/useNavigate';
+import { LogIn } from 'lucide-react';
+import wegLogo from '../assets/weg-logo.png';
+
+export default function LoginPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { signIn } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      await signIn(email, password);
+      navigate('/');
+    } catch (err: any) {
+      if (err.message.includes('Invalid login credentials')) {
+        setError('Email ou senha incorretos');
+      } else if (err.message.includes('Email not confirmed')) {
+        setError('Email não confirmado. Verifique sua caixa de entrada.');
+      } else {
+        setError('Erro ao fazer login. Tente novamente.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
+      <div className="max-w-md w-full">
+        <div className="bg-white rounded-lg shadow-md p-8">
+          <div className="flex justify-center mb-6">
+            <img src={wegLogo} alt="WEG Logo" className="h-20 w-auto" />
+          </div>
+
+          <h1 className="text-2xl font-bold text-gray-900 text-center mb-2">
+            Carregamentos Solar
+          </h1>
+          <p className="text-gray-600 text-center mb-8">
+            Entre com sua conta
+          </p>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="seu@email.com"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                Senha
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="••••••••"
+              />
+            </div>
+
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                {error}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  Entrando...
+                </>
+              ) : (
+                <>
+                  <LogIn size={20} />
+                  Entrar
+                </>
+              )}
+            </button>
+          </form>
+
+          <div className="mt-6 text-center">
+            <p className="text-gray-600">
+              Não tem uma conta?{' '}
+              <button
+                onClick={() => navigate('/register')}
+                className="text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Criar conta
+              </button>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

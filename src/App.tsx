@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Calendar, List, Plus, Truck, BarChart3 } from 'lucide-react';
+import { Calendar, List, Plus, Truck, BarChart3, LogOut } from 'lucide-react';
 import { supabase, TruckLoading } from './lib/supabase';
+import { useAuth } from './contexts/AuthContext';
+import { useNavigate } from './hooks/useNavigate';
 import CalendarView from './components/CalendarView';
 import TableView from './components/TableView';
 import LoadingForm from './components/LoadingForm';
@@ -16,6 +18,18 @@ function App() {
   const [showForm, setShowForm] = useState(false);
   const [selectedLoading, setSelectedLoading] = useState<TruckLoading | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const { signOut, user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigate('/login');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      alert('Erro ao sair. Tente novamente.');
+    }
+  };
 
   useEffect(() => {
     fetchLoadings();
@@ -191,6 +205,15 @@ function App() {
               >
                 <Plus size={20} />
                 Novo Carregamento
+              </button>
+
+              <button
+                onClick={handleSignOut}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors shadow-sm"
+                title="Sair"
+              >
+                <LogOut size={20} />
+                Sair
               </button>
             </div>
           </div>
